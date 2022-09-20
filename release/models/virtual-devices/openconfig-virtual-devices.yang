@@ -1,0 +1,389 @@
+module openconfig-virtual-devices {
+
+  yang-version "1";
+
+  // namespace
+  namespace "http://openconfig.net/yang/virtual-devices";
+
+  prefix "oc-vdevice";
+
+  // import some basic types
+  import openconfig-yang-types { prefix oc-yang; }
+  import openconfig-types { prefix oc-types; }
+  import openconfig-extensions { prefix oc-ext; }
+  import openconfig-virtual-device-types { prefix oc-vdevice-types; }
+
+  // meta
+  organization "IPDK - Infrastructure Programming Development Kit";
+
+  contact
+    "IPDK Admin
+    ipdkadmin@gmail.com";
+
+  description
+    "Model for managing virtual devices added/deleted
+    into compute instances such as VMs or whole hosts
+
+    Redistribution and use in source and binary forms, with or without
+    modification, is permitted pursuant to, and subject to the license
+    terms contained in, the Simplified BSD License set forth in
+    Section 4.c of the IETF Trust's Legal Provisions Relating
+    to IETF Documents (http://trustee.ietf.org/license-info).";
+
+  oc-ext:openconfig-version "2.5.0";
+
+  // OpenConfig specific extensions for module metadata.
+  oc-ext:regexp-posix;
+  oc-ext:catalog-organization "openconfig";
+  oc-ext:origin "openconfig";
+
+  // typedef statements
+
+  typedef base-virtual-device-ref {
+    type leafref {
+      path "/oc-vdevice:virtual-devices/oc-vdevice:virtual-device/oc-vdevice:device-id";
+    }
+    description
+      "Reusable type for by-name reference to a base virtual device.";
+  }
+
+  typedef virtual-device-id {
+    type string;
+    description
+      "User-defined identifier for a virtual-device, generally used to
+      name a virtual device reference.  The id can be arbitrary but a
+      useful convention is to use a combination of device type
+      and numerical index.";
+  }
+
+  grouping vdevice-model-version {
+    description
+      "Reusable definition for a reference to a virtual device model version";
+
+      leaf model-version {
+        type string;
+        description
+          "Version number of config & oper objects";
+      }
+  }
+
+  grouping vdevice-config {
+    description
+      "Configuration data for virtual devices";
+
+    leaf device-id {
+      type virtual-device-id;
+      mandatory true;
+      description
+        "The id/name of the virtual device";
+    }
+
+    leaf type {
+      type identityref {
+        base oc-vdevice-types:VIRTUAL_DEVICE_TYPE;
+      }
+      mandatory true;
+      description
+        "The type of virtual device";
+    }
+
+    leaf description {
+      type string;
+      description
+        "A textual description of the virtual device.";
+    }
+
+    leaf enabled {
+      type boolean;
+      default "true";
+      description
+        "This leaf contains the configured, desired state of the
+        virtual device.";
+    }
+
+    leaf instance {
+      type string;
+      description
+        "Instance to associate with this device";
+    }
+
+    leaf device-version {
+      type string;
+      description
+        "Device specific version
+        
+        For e.g.: 0.95 or 1.0 for virtio";
+    }
+
+    uses vdevice-model-version;
+  }
+
+  grouping vdevice-common-state {
+    description
+      "Operational state data (in addition to intended configuration)
+      at the global level for this virtual device";
+
+    oc-ext:operational;
+
+    leaf admin-status {
+      type enumeration {
+        enum UP {
+          description
+            "Ready for the compute instance to use.";
+        }
+        enum DOWN {
+          description
+            "Admin of the infrastructure has disabled this device.";
+        }
+        enum ERROR {
+          description
+            "Device error detected which has disabled this device.";
+        }
+      }
+      mandatory true;
+      description
+        "The desired state of the virtual device.
+        Reflects the administrative state as set by enabling or
+        disabling the interface.";
+      oc-ext:telemetry-on-change;
+    }
+
+    leaf oper-status {
+      type enumeration {
+        enum UP {
+          value 1;
+          description
+            "Ready for the compute instance to use.";
+        }
+        enum DOWN {
+          value 2;
+          description
+            "Admin of the infrastructure has disabled this device.";
+        }
+        enum TESTING {
+          value 3;
+          description
+            "Device error detected which has disabled this device.";
+        }
+        enum UNKNOWN {
+          value 4;
+          description
+            "Status cannot be determined for some reason.";
+        }
+        enum DORMANT {
+          value 5;
+          description
+            "Waiting for some external event.";
+        }
+        enum NOT_PRESENT {
+          value 6;
+          description
+            "Some component (typically hardware) is missing.";
+        }
+        enum LOWER_LAYER_DOWN {
+          value 7;
+          description
+            "Down due to state of lower-layer interface(s).";
+        }
+      }
+      mandatory true;
+      description
+        "The current operational state of the virtual device.";
+      oc-ext:telemetry-on-change;
+    }
+
+    leaf last-change {
+      type oc-types:timeticks64;
+      description
+        "This timestamp indicates the absolute time of the last
+        state change of the interface (e.g., up-to-down transition).
+        This is different than the SNMP ifLastChange object in the
+        standard interface MIB in that it is not relative to the
+        system boot time (i.e,. sysUpTime).
+
+        The value is the timestamp in nanoseconds relative to
+        the Unix Epoch (Jan 1, 1970 00:00:00 UTC).";
+      oc-ext:telemetry-on-change;
+    }
+
+  }
+
+
+  grouping vdevice-counters-state {
+    description
+      "Operational state representing virtual device counters
+      and statistics.";
+
+    oc-ext:operational;
+
+    container counters {
+      description
+        "A collection of device-related statistics objects.";
+
+      leaf in-octets {
+        type oc-yang:counter64;
+        description
+          "The total number of octets received on the device.
+
+          In the case of storage in-octets are from the
+          request payloads for the write requests.
+
+          Sent from the compute instance.";
+      }
+
+      leaf in-pkts {
+        type oc-yang:counter64;
+        description
+          "The total number of 'packets' received on the device.
+
+          In the case of storage in-pkts are individual requests.
+
+          Sent from the compute instance.";
+      }
+
+      leaf in-discards {
+        type oc-yang:counter64;
+        description
+          "The number of inbound packets that were chosen to be
+          discarded even though no errors had been detected to
+          prevent their being deliverable to the infrastructure.";
+      }
+
+      leaf out-octets {
+        type oc-yang:counter64;
+        description
+          "The total number of octets transmitted out of the
+          virtual device, including framing characters.
+
+          In the case of storage out-octets are from the
+          completion payloads for the read requests.
+
+          Sent to the compute instance.";
+      }
+
+      leaf out-pkts {
+        type oc-yang:counter64;
+        description
+          "The total number of packets transmitted out of the
+          virtual device.
+
+          In the case of storage out-pkts are individual
+          completions.
+
+          Sent to the compute instance.";
+      }
+
+      leaf out-discards {
+        type oc-yang:counter64;
+        description
+          "The number of outbound packets that were chosen to be
+          discarded even though no errors had been detected to
+          prevent their being deliverable to the infrastructure.";
+      }
+
+      leaf last-clear {
+        type oc-types:timeticks64;
+        description
+          "Timestamp of the last time the device counters were
+          cleared.
+
+          The value is the timestamp in nanoseconds relative to
+          the Unix Epoch (Jan 1, 1970 00:00:00 UTC).";
+        oc-ext:telemetry-on-change;
+      }
+    }
+  }
+
+  grouping vdevice-limits {
+    description
+      "Reusable definition of limits of virtual device";
+
+    leaf bandwidth-limit {
+      type uint32;
+      units Mbps;
+      default 0;
+      description
+        "Bandwidth limit for virtual-device";
+    }
+
+    leaf requests-limit {
+      type uint32;
+      units pps;
+      default 0;
+      description
+        "Requests limit for virtual-device";
+    }
+  }
+
+  grouping vdevice-host-virtual-ref {
+    description
+      "Grouping of host virtual device & function config";
+
+    leaf host-virtual-device {
+      type string;
+      description
+        "Hardware device on the host to associate this
+        virtual device with.
+        
+        For host virtualization on an infrastructure device only.";
+    }
+
+    leaf host-virtual-function {
+      type string;
+      description
+        "The virtual function on the host virtual device to
+        associate this virtual device with.
+        
+        For host virtualization on an infrastructure device only.";
+    }
+  }
+
+  /*
+   * Data nodes
+   */
+
+  container virtual-devices {
+    description
+      "Enclosing container for the list of virtual devices";
+    
+    list virtual-device {
+      key "device-id";
+
+      description
+        "A list of virtual devices";
+      
+      leaf device-id {
+        type leafref {
+          path "../config/device-id";
+        }
+        description
+          "References the device-id of the virtual device";
+      }
+
+      container config {
+        description
+          "Configurable items at the global level";
+        oc-ext:telemetry-on-change;
+
+        uses vdevice-config;
+        uses vdevice-limits;
+        uses vdevice-host-virtual-ref;
+      }
+
+      container state {
+        config false;
+        description
+          "Operational state data at the global level";
+        
+        uses vdevice-config;
+        uses vdevice-limits;
+        uses vdevice-common-state;
+        uses vdevice-counters-state;
+      }
+
+
+    }
+  }
+
+
+}

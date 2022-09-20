@@ -1,0 +1,52 @@
+module openconfig-virtual-device-types {
+
+  yang-version "1";
+
+  namespace "http://openconfig.net/yang/virtual-device-types";
+
+  prefix "oc-vdevice-types";
+
+  import openconfig-extensions { prefix oc-ext; }
+
+  organization "IPDK - Infrastructure Programming Development Kit";
+
+  contact
+    "IPDK Admin
+    ipdkadmin@gmail.com";
+
+  description
+    "Types associate with a virtual device";
+
+  oc-ext:openconfig-version "2.5.0";
+
+  identity VIRTUAL_DEVICE_TYPE {
+    description
+      "Base identity from which specific virtual devicetypes are
+       derived.";
+  }
+
+  identity VIRTIO_NET {
+    base VIRTUAL_DEVICE_TYPE;
+    description
+      "A virtio-net virtual device type";
+  }
+
+  identity VIRTIO_BLK {
+    base VIRTUAL_DEVICE_TYPE;
+    description
+      "A virtio-blk virtual device type";
+  }
+
+  identity VIRTIO_SCSI {
+    base VIRTUAL_DEVICE_TYPE;
+    description
+      "A virtio-scsi virtual device type";
+  }
+
+  identity NVMe {
+    base VIRTUAL_DEVICE_TYPE;
+    description
+      "A NVMe virtual device type";
+  }
+
+}
