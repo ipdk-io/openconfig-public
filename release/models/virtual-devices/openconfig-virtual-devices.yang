@@ -60,7 +60,7 @@ module openconfig-virtual-devices {
       leaf model-version {
         type string;
         description
-          "Version number of config & oper objects";
+          "Version number of config and operational objects";
       }
   }
 
