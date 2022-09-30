@@ -189,20 +189,6 @@ module openconfig-virtual-devices {
       oc-ext:telemetry-on-change;
     }
 
-    leaf last-change {
-      type oc-types:timeticks64;
-      description
-        "This timestamp indicates the absolute time of the last
-        state change of the interface (e.g., up-to-down transition).
-        This is different than the SNMP ifLastChange object in the
-        standard interface MIB in that it is not relative to the
-        system boot time (i.e,. sysUpTime).
-
-        The value is the timestamp in nanoseconds relative to
-        the Unix Epoch (Jan 1, 1970 00:00:00 UTC).";
-      oc-ext:telemetry-on-change;
-    }
-
   }
 
 
@@ -278,16 +264,6 @@ module openconfig-virtual-devices {
           prevent their being deliverable to the infrastructure.";
       }
 
-      leaf last-clear {
-        type oc-types:timeticks64;
-        description
-          "Timestamp of the last time the device counters were
-          cleared.
-
-          The value is the timestamp in nanoseconds relative to
-          the Unix Epoch (Jan 1, 1970 00:00:00 UTC).";
-        oc-ext:telemetry-on-change;
-      }
     }
   }
 
