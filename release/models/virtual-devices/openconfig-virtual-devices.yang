@@ -350,6 +350,7 @@ module openconfig-virtual-devices {
         
         uses vdevice-config;
         uses vdevice-limits;
+        uses vdevice-host-virtual-ref;
         uses vdevice-common-state;
         uses vdevice-counters-state;
       }
