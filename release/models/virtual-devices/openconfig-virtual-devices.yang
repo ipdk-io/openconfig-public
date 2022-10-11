@@ -112,6 +112,18 @@ module openconfig-virtual-devices {
         For e.g.: 0.95 or 1.0 for virtio";
     }
 
+    leaf mac-address {
+      type oc-yang:mac-address;
+      description
+        "Mac address of the virtual device";
+    }
+
+    leaf rss-enabled {
+      type boolean;
+      description
+        "Enable or disable RSS for the virtual device";
+    }
+
     uses vdevice-model-version;
   }
 
@@ -311,6 +323,17 @@ module openconfig-virtual-devices {
     }
   }
 
+  grouping vdevice-queues {
+    description
+      "A reusable definition of virtual device queues";
+
+    leaf queues {
+      type uint32;
+      description
+        "Number of queues on the virtual device";
+    }
+  }
+
   /*
    * Data nodes
    */
@@ -340,6 +363,11 @@ module openconfig-virtual-devices {
 
         uses vdevice-config;
         uses vdevice-limits;
+        uses vdevice-queues {
+          refine "queues" {
+            description "Maximum number of queues available on the virtual device";
+          }
+        }
         uses vdevice-host-virtual-ref;
       }
 
@@ -348,8 +376,19 @@ module openconfig-virtual-devices {
         description
           "Operational state data at the global level";
         
+        leaf active-queues {
+          type uint32;
+          description
+            "Active number of queues";
+        }
+
         uses vdevice-config;
         uses vdevice-limits;
+        uses vdevice-queues {
+          refine "queues" {
+            description "Active number of queues available on the virtual device";
+          }
+        }
         uses vdevice-host-virtual-ref;
         uses vdevice-common-state;
         uses vdevice-counters-state;
