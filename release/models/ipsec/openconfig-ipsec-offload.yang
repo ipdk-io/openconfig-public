@@ -1,0 +1,357 @@
+// Copyright (c) 2022 Intel Corporation.
+// SPDX-License-Identifier: Apache-2.0
+
+module openconfig-ipsec-offload {
+    yang-version "1";
+    namespace "http://openconfig.net/yang/ipsec-offload";
+    prefix "oc-ipsec-offload";
+
+    import ietf-inet-types { prefix ietf-inet; }
+    import ietf-yang-types { prefix ietf-yang; }
+    import ietf-i2nsf-ikec { prefix ietf-nsfikec; }
+    import ietf-netconf-acm { prefix ietf-nacm; }
+    import openconfig-yang-types { prefix oc-yang; }
+
+  // meta
+  organization "IPDK - Infrastructure Programming Development Kit";
+
+  contact
+    "IPDK Admin
+    ipdkadmin@gmail.com";
+
+  description
+    "Data model for IKE-less case in the Smart NIC based IPsec offload
+    flow protection service.";
+
+
+  feature ipsec-offload-notification {
+    description
+      "This feature indicates that the server supports
+      generating notifications in the ikeless module.
+
+      To ensure broader applicability of this module,
+      the notifications are marked as a feature.
+      For the implementation of the IKE-less case,
+      the NSF is expected to implement this
+      feature.";
+  }
+    
+  grouping ipsec-offload-config {
+    description
+      "Reusable grouping for config data";
+    
+    leaf offload-id {
+      type uint32;
+      mandatory true;
+      description
+        "SAD-entry-unique offload id to identify this
+        entry.";
+    }
+
+    leaf direction {
+      type boolean;
+      mandatory true;
+      description
+        "This value represents the ingress/egress
+        SAD tables. If the value is true(1) the direction is egress
+        Id the value is false the direction is ingress";
+    }
+
+    leaf req-id {
+      type uint64;
+      default "0";
+        description
+        "This value allows linking this
+        IPsec SA with an IPsec policy with
+        the same req-id.";
+    }
+    
+    leaf spi {
+      type uint32 {
+        range "0..max";
+      }
+      mandatory true;
+      description
+        "IPsec SA of Security Parameter Index (SPI).";
+    }
+    
+    leaf ext-seq-num {
+      type boolean;
+      default "true";
+      description
+        "True if this IPsec SA is using extended
+        sequence numbers.  If true, the 64-bit
+        extended sequence number counter is used;
+        if false, the normal 32-bit sequence
+        number counter is used.";
+    }
+
+    leaf anti-replay-window-size {
+      type uint32;
+      default "64";
+      description
+        "To set the anti-replay window size.
+        The default value is set to 64,
+        following the recommendation in RFC 4303.";
+      reference
+        "RFC 4303: IP Encapsulating Security Payload (ESP),
+        Section 3.4.3.";
+    }
+
+    leaf protocol-parameters {
+      type ietf-nsfikec:ipsec-protocol-params;
+      default "esp";
+      description
+        "Security protocol of IPsec SA, only
+        ESP so far.";
+    }
+    
+    leaf mode {
+      type ietf-nsfikec:ipsec-mode;
+      default "transport";
+      description
+        "Tunnel or transport mode.";
+    }
+    
+    container esp-sa {
+      description
+        "In case the IPsec SA is an
+        Encapsulation Security Payload
+        (ESP), it is required to specify
+        encryption and integrity
+        algorithms and key materials.";
+      
+      container encryption {
+        description
+          "Configuration of encryption or
+          AEAD algorithm for IPsec
+          Encapsulation Security Payload
+          (ESP).";
+        
+        leaf encryption-algorithm {
+          type ietf-nsfikec:encr-alg-t;
+          default "12";
+          description
+            "Configuration of ESP
+            encryption.  With AEAD
+            algorithms, the integrity-algorithm
+            leaf is not used.";
+        }
+        
+        leaf key {
+          ietf-nacm:default-deny-all;
+          type ietf-yang:hex-string;
+          mandatory true;
+          description
+            "ESP encryption key value.
+            If this leaf is not defined,
+            the key is not defined
+            (e.g., encryption is NULL).
+            The key length is
+            determined by the
+            length of the key set in
+            this leaf.  By default, it is
+            128 bits.";
+        }
+        
+        leaf key-len {
+          type uint32;
+          mandatory true;
+          description
+            "ESP encryption key length value.
+            The key in this leaf node contains
+            the salt as well. The len field will
+            determine the length and remaining
+            will be used as salt.";
+        }
+
+      }
+
+    } /*container esp-sa*/
+    
+    container sa-lifetime-hard {
+      description
+        "IPsec SA hard lifetime.  The action
+        associated is terminate and hold.";
+      uses ietf-nsfikec:lifetime;
+    }
+    
+    container sa-lifetime-soft {
+      description
+        "IPsec SA soft lifetime.";
+      uses ietf-nsfikec:lifetime;
+    }
+
+  } /*grouping config*/
+
+  grouping ipsec-offload-state {
+    description
+      "Operational state representing ipsec counters and
+      and statistics.";
+    
+    /*oc-ext:operational;*/
+    
+    container counters {
+      description
+        "A collection of ipsec-related statistics objects.";
+      
+      leaf pkts-processed {
+      type oc-yang:counter64;
+      description
+        "The total number of packets decrypted by this sec association.";
+    }
+      leaf bytes-processed {
+      type oc-yang:counter64;
+      description
+        "The total number of bytes decrypted by this sec association.";
+    }
+      leaf ARW-failures {
+      type oc-yang:counter32;
+      description
+        "This counters represents the total number of replay errors in
+        this sec association.";
+    }
+      leaf auth-failures {
+      type oc-yang:counter32;
+      description
+        "The total number of auth failures happend while decrypting the rx pkts
+        by this sec association.";
+    }
+      leaf pkt-dropped {
+      type oc-yang:counter32;
+      description
+        "The total number of packets dropped by this sec association for errors.";
+    }
+    }/*container counters*/
+  } /*grouping state*/
+
+  grouping ipsec-offload-top {
+
+    container ipsec-offload {
+      description
+        "Container for configuration of the IKE-less
+        case. The container contains one additional
+        containers: 'sad'.  This allows the I2NSF
+        Controller to configure IPsec
+        Security Associations (IPsec SAs) in the Security
+        Association Database (SAD).";
+      reference
+        "RFC 4301: Security Architecture for the Internet Protocol.";
+
+      container sad {
+        description
+          "Configuration of the IPsec Security Association
+          Database (SAD).";
+        reference
+          "RFC 4301: Security Architecture for the Internet Protocol,
+          Section 4.4.2.1.";
+
+        list sad-entry {
+          key "offload-id direction";
+          ordered-by user;
+          description
+            "List of SAD entries that form the SAD.";
+
+          leaf offload-id {
+            type leafref {
+              path "../config/offload-id";
+            }
+            description
+              "Reference to offload-id";
+          }
+
+          leaf direction {
+            type leafref {
+              path "../config/direction";
+            }
+            description
+              "Reference to direction";
+          }
+
+          container config {
+            description
+              "This container allows configuring
+              details of an IPsec SA.";
+
+            uses ipsec-offload-config;
+          } /*config*/
+          
+          container state {
+            config false;
+            uses ipsec-offload-config;
+            uses ipsec-offload-state; 
+          }/*container state*/
+        } /*list sad-entry*/
+      } /*container sad*/
+
+      container ipsec-spi {
+        description
+          "This container is used to request for a ipsec spi.
+          A 32 bit spi number will be received back as a response.";
+
+        leaf rx-spi {
+          config false;
+          type uint32;
+          mandatory true;
+          description
+            "Request for a receive side SPI. The SPI will be generated and shared in response.";
+        }
+      }/*container ipsec-spi*/
+
+    } /* container ipsec-offload */
+  } /* grouping ipsec-offload-top */
+
+  /* Data nodes */
+  uses ipsec-offload-top;
+
+  /* Notifications */
+  notification sadb-expire {
+    if-feature "ipsec-offload-notification";
+    description
+      "An IPsec SA expiration (soft or hard).";
+
+    leaf ipsec-sa-spi {
+      type uint32;
+      mandatory true;
+      description
+        "It contains the SAD entry SPI of
+        the IPsec SA that sends a notification from H/W.
+        The SA index will be fetched from SPI present in the packet.
+        The SA index will be considered for RX SAD table.";
+    }
+
+    leaf soft-lifetime-expire {
+      type boolean;
+      mandatory true;
+      description
+        "If this value is true, the lifetime expired is
+        soft.  If it is false, the lifetime is hard.";
+    }
+
+    leaf ipsec-sa-protocol {
+      type uint8;
+      mandatory true;
+      description
+        "This will be fetched from the protocol field of the ip packet
+        In our case it will be always ESP.";
+    }
+
+    leaf ipsec-sa-dest-address {
+      type ietf-inet:ip-address;
+      mandatory true;
+      description
+        "Contains the destination IP address of the packet which triggers the H/W
+        event";
+    }
+
+    leaf address-family {
+      type boolean;
+      mandatory true;
+      description
+        "Contains the destination IP address type Ipv4/Ipv6. If the value is true(1) 
+        the address in ipv4, If the value is false the address is ipv6";
+    }
+
+  }/* Notifications */
+
+}
