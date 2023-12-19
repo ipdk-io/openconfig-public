@@ -26,12 +26,12 @@ module openconfig-virtual-ports {
     description
       "Configuration data for the virtual port";
 
-    leaf glort {
+    leaf global-vport-index {
       type uint32;
-      default 0;
       description
         "A global resource tag that uniquely identifies the virtual port
-        resource";
+        resource. 
+        Valid Range is 16 to 2**32-1. 0-15 is reserved for non-virtual ports"; 
     }
 
     leaf mac-address {
@@ -45,9 +45,6 @@ module openconfig-virtual-ports {
       type enumeration {
         enum Toeplitz {
           description "The Toeplitz algorithm";
-        }
-        enum Xor {
-          description "XOR as the RSS distribution function";
         }
       }
       description
@@ -147,13 +144,7 @@ module openconfig-virtual-ports {
 
     oc-ext:operational;
 
-    leaf user-defined-attribute {
-      type string;
-      description
-        "Flexible configurable opaque string defined between application and a device driver ";
-    }
-
-    leaf static-entry {
+    leaf initial-entry {
       type boolean;
       description
         "True if vport was created by device based on node policy";
@@ -238,13 +229,31 @@ module openconfig-virtual-ports {
     }
 
     leaf tx-queue-model {
-      type uint8; // enum type?
+      type enumeration {
+        enum SINGLE {
+          value 1;
+          description "Single Tx queue";
+        }
+        enum SPLIT {
+          value 2;
+          description "Split Tx queue";
+        }
+      }
       description
         "Active Tx queue model. Single and split-queue models are supported";
     }
 
     leaf rx-queue-model {
-      type uint8; // enum type?
+      type enumeration {
+        enum SINGLE {
+          value 1;
+          description "Single Rx queue";
+        }
+        enum SPLIT {
+          value 2;
+          description "Split Rx queue";
+        }
+      }
       description
         "Active Rx queue model. Single and split-queue models are supported";
     }
@@ -345,13 +354,6 @@ module openconfig-virtual-ports {
           "The total number of packets received by the instances' driver";
       }
 
-      leaf actual-bandwidth-limit {
-        type oc-yang:counter64;
-        description
-          "Device's bandwidth limit in Mbps (0 = no limit)
-          May differ from requested limit";
-      }
-
       leaf discard-bytes {
         type oc-yang:counter64;
         description
@@ -376,29 +378,29 @@ module openconfig-virtual-ports {
       "Enclosing container for the list of virtual ports";
     
     list virtual-port {
-      key "glort";
+      key "global-vport-index";
 
       description
         "A list of virtual ports";
 
-      leaf glort {
+      leaf global-vport-index {
         type leafref {
-          path "../config/glort";
+          path "../config/global-vport-index";
         }
         description
-          "References the global resource tag";
+          "References the global vport index";
       }
 
       leaf host-id {
         type uint8;
         mandatory true;
-        description "Host ID"; // 4 bits
+        description "Host ID. Creation time only and cannot be updated";
       }
 
       leaf pf-id {
         type uint16;
         mandatory true;
-        description "PF ID"; // 10 bits
+        description "PF ID. Creation time only and cannot be updated";
       }
 
       leaf function-type {
@@ -414,19 +416,19 @@ module openconfig-virtual-ports {
           }
         }
         mandatory true;
-        description "Function Type: Options are No-Virtualization, SR-IOV or ADI"; // 2 bits
+        description "Function Type: Options are No-Virtualization, SR-IOV or ADI";
       }
 
       leaf function-id {
         type uint16;
         mandatory true;
-        description "VF or ADI ID"; // 16 bits
+        description "VF or ADI ID. Creation time only and cannot be updated";
       }
 
       leaf vport-index {
         type uint16;
         mandatory true;
-        description "vPort index"; // 16 bits
+        description "Local vport index. Creation time only and cannot be updated"; // 16 bits
       }
 
       container config {
