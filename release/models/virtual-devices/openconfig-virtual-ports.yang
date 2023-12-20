@@ -26,12 +26,12 @@ module openconfig-virtual-ports {
     description
       "Configuration data for the virtual port";
 
-    leaf global-vport-index {
+    leaf global-resource-id {
       type uint32;
       description
-        "A global resource tag that uniquely identifies the virtual port
+        "A global resource ID that uniquely identifies the virtual port
         resource. 
-        Valid Range is 16 to 2**32-1. 0-15 is reserved for non-virtual ports"; 
+        Valid Range is 16 to 2**32-1 (0-15 is reserved for non-virtual ports)"; 
     }
 
     leaf mac-address {
@@ -107,6 +107,9 @@ module openconfig-virtual-ports {
 
     leaf flow-steering {
       type enumeration {
+        enum NONE {
+          description "No flow steering";
+        }
         enum FLOW_STEERING {
           description
             "Flow steering";
@@ -171,22 +174,14 @@ module openconfig-virtual-ports {
     leaf oper-status {
       type enumeration {
         enum PROV_INCOMPLETE {
-          value 1;
           description
             "Provisioning incomplete";
         }
         enum PROVISIONED {
-          value 2;
           description
             "Provisioned";
         }
-        enum DRIVER_LOADED {
-          value 3;
-          description
-            "Driver loaded";
-        }
         enum LINK_UP {
-          value 4;
           description
             "Link UP";
         }
@@ -231,11 +226,9 @@ module openconfig-virtual-ports {
     leaf tx-queue-model {
       type enumeration {
         enum SINGLE {
-          value 1;
           description "Single Tx queue";
         }
         enum SPLIT {
-          value 2;
           description "Split Tx queue";
         }
       }
@@ -246,11 +239,9 @@ module openconfig-virtual-ports {
     leaf rx-queue-model {
       type enumeration {
         enum SINGLE {
-          value 1;
           description "Single Rx queue";
         }
         enum SPLIT {
-          value 2;
           description "Split Rx queue";
         }
       }
@@ -378,17 +369,17 @@ module openconfig-virtual-ports {
       "Enclosing container for the list of virtual ports";
     
     list virtual-port {
-      key "global-vport-index";
+      key "global-resource-id";
 
       description
         "A list of virtual ports";
 
-      leaf global-vport-index {
+      leaf global-resource-id {
         type leafref {
-          path "../config/global-vport-index";
+          path "../config/global-resource-id";
         }
         description
-          "References the global vport index";
+          "References the global resource ID";
       }
 
       leaf host-id {
