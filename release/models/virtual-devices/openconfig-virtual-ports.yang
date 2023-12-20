@@ -153,6 +153,38 @@ module openconfig-virtual-ports {
         "True if vport was created by device based on node policy";
     }
 
+    leaf provision-state {
+      type enumeration {
+        enum PROV_INCOMPLETE {
+          description
+            "Provisioning incomplete";
+        }
+        enum PROVISIONED {
+          description
+            "Provisioned";
+        }
+      }
+      description
+        "The current provisioned state of the virtual port";
+    }
+
+    leaf oper-status {
+      type enumeration {
+        enum LINK_UP {
+          description
+            "Link up";
+        }
+        enum LINK_DOWN {
+          description
+            "Link down";
+        }
+      }
+      mandatory true;
+      description
+        "The current operational state of the virtual port";
+      oc-ext:telemetry-on-change;
+    }
+
     leaf pcie-bus {
       type uint8;
       description
@@ -169,27 +201,6 @@ module openconfig-virtual-ports {
       type uint8;
       description
         "Enumerated host PCIe function function ID";
-    }
-
-    leaf oper-status {
-      type enumeration {
-        enum PROV_INCOMPLETE {
-          description
-            "Provisioning incomplete";
-        }
-        enum PROVISIONED {
-          description
-            "Provisioned";
-        }
-        enum LINK_UP {
-          description
-            "Link UP";
-        }
-      }
-      mandatory true;
-      description
-        "The current operational state of the virtual port";
-      oc-ext:telemetry-on-change;
     }
 
     leaf pcie-rid {
