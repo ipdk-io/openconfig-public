@@ -1,4 +1,4 @@
-// Copyright (c) 2023 Intel Corporation.
+// Copyright (c) 2023-2024 Intel Corporation.
 // SPDX-License-Identifier: Apache-2.0
 
 module openconfig-virtual-ports {
@@ -32,6 +32,46 @@ module openconfig-virtual-ports {
         "A global resource ID that uniquely identifies the virtual port
         resource. 
         Valid Range is 16 to 2**32-1 (0-15 is reserved for non-virtual ports)"; 
+    }
+
+    leaf host-id {
+      type uint8;
+      mandatory true;
+      description "Host ID. Creation time only and cannot be updated";
+    }
+
+    leaf pf-id {
+      type uint16;
+      mandatory true;
+      description "PF ID. Creation time only and cannot be updated";
+    }
+
+    leaf function-type {
+      type enumeration {
+        enum NO-VIRTUALIZATION {
+          description "No Virtualization";
+        }
+        enum SR-IOV {
+          description "SR-IOV";
+        }
+        enum ADI {
+          description "ADI";
+        }
+      }
+      mandatory true;
+      description "Function Type: Options are No-Virtualization, SR-IOV or ADI";
+    }
+
+    leaf function-id {
+      type uint16;
+      mandatory true;
+      description "VF or ADI ID. Creation time only and cannot be updated";
+    }
+
+    leaf vport-index {
+      type uint16;
+      mandatory true;
+      description "Local vport index. Creation time only and cannot be updated"; // 16 bits
     }
 
     leaf mac-address {
@@ -391,46 +431,6 @@ module openconfig-virtual-ports {
         }
         description
           "References the global resource ID";
-      }
-
-      leaf host-id {
-        type uint8;
-        mandatory true;
-        description "Host ID. Creation time only and cannot be updated";
-      }
-
-      leaf pf-id {
-        type uint16;
-        mandatory true;
-        description "PF ID. Creation time only and cannot be updated";
-      }
-
-      leaf function-type {
-        type enumeration {
-          enum NO-VIRTUALIZATION {
-            description "No Virtualization";
-          }
-          enum SR-IOV {
-            description "SR-IOV";
-          }
-          enum ADI {
-            description "ADI";
-          }
-        }
-        mandatory true;
-        description "Function Type: Options are No-Virtualization, SR-IOV or ADI";
-      }
-
-      leaf function-id {
-        type uint16;
-        mandatory true;
-        description "VF or ADI ID. Creation time only and cannot be updated";
-      }
-
-      leaf vport-index {
-        type uint16;
-        mandatory true;
-        description "Local vport index. Creation time only and cannot be updated"; // 16 bits
       }
 
       container config {
