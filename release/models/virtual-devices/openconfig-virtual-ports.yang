@@ -179,6 +179,19 @@ module openconfig-virtual-ports {
       description
         "The configured, desired state of the virtual port";
     }
+
+     leaf vf_num {
+      type uint16;
+      description
+        "Starting VF ID associated with the host_id and func_num being provisioned";
+    }
+
+    leaf vf_count {
+      type uint16;
+      description
+        "Number of VFs being provisioned";
+    }
+    
   }
 
   grouping vport-state {
