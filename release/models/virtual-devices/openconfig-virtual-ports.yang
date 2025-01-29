@@ -1,0 +1,472 @@
+// Copyright (c) 2023-2024 Intel Corporation.
+// SPDX-License-Identifier: Apache-2.0
+
+module openconfig-virtual-ports {
+
+  yang-version "1";
+
+  // namespace
+  namespace "http://openconfig.net/yang/virtual-ports";
+  prefix "oc-vport";
+
+  import openconfig-yang-types { prefix oc-yang; }
+  import openconfig-extensions { prefix oc-ext; }
+  
+  // meta
+  organization "IPDK - Infrastructure Programming Development Kit";
+
+  contact
+    "IPDK Admin
+    ipdkadmin@gmail.com";
+
+  description
+    "Model for managing virtual ports";
+
+  grouping vport-config {
+    description
+      "Configuration data for the virtual port";
+
+    leaf global-resource-id {
+      type uint32;
+      description
+        "A global resource ID that uniquely identifies the virtual port
+        resource. 
+        Valid Range is 16 to 2**32-1 (0-15 is reserved for non-virtual ports)"; 
+    }
+
+    leaf host-id {
+      type uint8;
+      mandatory true;
+      description "Host ID. Creation time only and cannot be updated";
+    }
+
+    leaf pf-id {
+      type uint16;
+      mandatory true;
+      description "PF ID. Creation time only and cannot be updated";
+    }
+
+    leaf function-type {
+      type enumeration {
+        enum NO-VIRTUALIZATION {
+          description "No Virtualization";
+        }
+        enum SR-IOV {
+          description "SR-IOV";
+        }
+        enum ADI {
+          description "ADI";
+        }
+      }
+      mandatory true;
+      description "Function Type: Options are No-Virtualization, SR-IOV or ADI";
+    }
+
+    leaf function-id {
+      type uint16;
+      mandatory true;
+      description "VF or ADI ID. Creation time only and cannot be updated";
+    }
+
+    leaf vport-index {
+      type uint16;
+      mandatory true;
+      description "Local vport index. Creation time only and cannot be updated"; // 16 bits
+    }
+
+    leaf mac-address {
+      type oc-yang:mac-address;
+      mandatory true;
+      description
+        "The MAC address of the virtual port";
+    }
+
+    leaf rss-algorithm {
+      type enumeration {
+        enum Toeplitz {
+          description "The Toeplitz algorithm";
+        }
+      }
+      description
+        "The Receive Side Scaling (RSS) algorithm to use on the virtual port";
+    }
+
+    leaf max-rss-lut-size {
+      type uint8;
+      description
+        "Maximum RSS LUT size";
+    }
+
+    leaf mtu {
+      type uint16;
+      description
+        "Maximum tranmission unit size in bytes";
+    }
+
+    leaf bandwidth-limit {
+      type uint32;
+      description
+        "Maximum bandwidth limit in Mbps";
+    }
+
+    leaf min-tx-queues {
+      type uint16;
+      description
+        "Minimum number of transmission queues";
+    }
+
+    leaf max-tx-queues {
+      type uint16;
+      description
+        "Maximum number of transmission queues";
+    }
+
+    leaf min-rx-queues {
+      type uint16;
+      description
+        "Minimum number of receiving queues";
+    }
+
+    leaf max-rx-queues {
+      type uint16;
+      description
+        "Maximum number of receiving queues";
+    }
+
+    leaf default-egress-port {
+      type uint8;
+      description
+        "Default egress port used, if not changed by vswitch";
+    }
+
+    leaf rdma-capable {
+      type boolean;
+      description
+        "Capability to carry RDMA traffic";
+    }
+
+    leaf flow-steering {
+      type enumeration {
+        enum NONE {
+          description "No flow steering";
+        }
+        enum FLOW_STEERING {
+          description
+            "Flow steering";
+        }
+        enum INLINE_FLOW_STEERING {
+          description
+            "Inline flow steering";
+        }
+        enum INLINE_FLOW_STEERING_WITH_EXPLICIT_QUEUE {
+          description
+            "Inline flow steering with explicit queue";
+        }
+      }
+      description
+        "Flow steering type";
+    }
+
+    leaf max-flow-steering-rules {
+      type uint8;
+      description
+        "Maximum flow steering rules allowed";
+    }
+
+    leaf enabled {
+      type boolean;
+      default "true";
+      description
+        "The configured, desired state of the virtual port";
+    }
+
+     leaf vf_num {
+      type uint16;
+      description
+        "Starting VF ID associated with the host_id and func_num being provisioned";
+    }
+
+    leaf vf_count {
+      type uint16;
+      description
+        "Number of VFs being provisioned";
+    }
+    
+  }
+
+  grouping vport-state {
+    description
+      "Operational state data at the global level for this virtual port";
+
+    oc-ext:operational;
+
+    leaf initial-entry {
+      type boolean;
+      description
+        "True if vport was created by device based on node policy";
+    }
+
+    leaf provision-state {
+      type enumeration {
+        enum PROV_INCOMPLETE {
+          description
+            "Provisioning incomplete";
+        }
+        enum PROVISIONED {
+          description
+            "Provisioned";
+        }
+      }
+      description
+        "The current provisioned state of the virtual port";
+    }
+
+    leaf oper-status {
+      type enumeration {
+        enum LINK_UP {
+          description
+            "Link up";
+        }
+        enum LINK_DOWN {
+          description
+            "Link down";
+        }
+      }
+      mandatory true;
+      description
+        "The current operational state of the virtual port";
+      oc-ext:telemetry-on-change;
+    }
+
+    leaf pcie-bus {
+      type uint8;
+      description
+        "Enumerated host PCIe function bus ID";
+    }
+    
+    leaf pcie-device {
+      type uint8;
+      description
+        "Enumerated host PCIe function device ID";
+    }
+    
+    leaf pcie-function {
+      type uint8;
+      description
+        "Enumerated host PCIe function function ID";
+    }
+
+    leaf pcie-rid {
+      type uint32;
+      description
+        "PCIe routing ID (0xFFFFFFFF to indicate unspecified)";
+    }
+
+    leaf pcie-pasid {
+      type uint32;
+      description
+        "PCIe process address space ID (0xFFFFFFFF to indicate unspecified)";
+    }
+
+    leaf vsi {
+      type uint32;
+      description
+        "Virtual Station Interface contains internal index of vport
+        (0xFFFFFFFF to indicate unspecified)";
+    }
+
+    leaf rss-lut-size {
+      type uint8;
+      description
+        "Active RSS LUT size used";
+    }
+
+    leaf bandwidth {
+      type uint32;
+      description
+        "Active Tx bandwidth used in Mbps";
+    }
+
+    leaf tx-queue-model {
+      type enumeration {
+        enum SINGLE {
+          description "Single Tx queue";
+        }
+        enum SPLIT {
+          description "Split Tx queue";
+        }
+      }
+      description
+        "Active Tx queue model. Single and split-queue models are supported";
+    }
+
+    leaf rx-queue-model {
+      type enumeration {
+        enum SINGLE {
+          description "Single Rx queue";
+        }
+        enum SPLIT {
+          description "Split Rx queue";
+        }
+      }
+      description
+        "Active Rx queue model. Single and split-queue models are supported";
+    }
+
+    leaf num-tx-queues {
+      type uint16;
+      description
+        "Active number of Tx queues used";
+    }
+
+    leaf num-rx-queues {
+      type uint16;
+      description
+        "Active number of Rx queues used";
+    }
+
+    leaf num-tx-completion-queues {
+      type uint16;
+      description
+        "Active number of Tx completion queues used";
+    }
+
+    leaf num-rx-buffer-queues {
+      type uint16;
+      description
+        "Active number of Rx buffer queues used";
+    }
+
+    leaf num-queue-groups {
+      type uint16;
+      description
+        "Active number of queue groups used";
+    }
+
+    leaf rsc-enabled {
+      type boolean;
+      description
+        "RSC enabled (single or split queue for Rx)";
+    }
+
+    leaf edt-enabled {
+      type boolean;
+      description
+        "EDT enabled";
+    }
+
+    leaf ooc-enabled {
+      type boolean;
+      description
+        "OOC enabled";
+    }
+
+    leaf header-split-enabled {
+      type boolean;
+      description
+        "Header split enabled";
+    }
+
+    leaf rdma-enabled {
+      type boolean;
+      description
+        "RDMA enabled";
+    }
+  }
+
+  grouping vport-counters {
+    description
+      "Operational state representing virtual port counters
+      and statistics.";
+
+    oc-ext:operational;
+
+    container counters {
+      description
+        "A collection of vport-related statistic objects";
+
+      leaf transmit-bytes {
+        type oc-yang:counter64;
+        description
+          "The total number of bytes transmitted by the instances' driver";
+      }
+
+      leaf transmit-pkts {
+        type oc-yang:counter64;
+        description
+          "The total number of packets transmitted by the instances' driver";
+      }
+
+      leaf received-bytes {
+        type oc-yang:counter64;
+        description
+          "The total number of bytes received by the instances' driver";
+      }
+
+      leaf received-pkts {
+        type oc-yang:counter64;
+        description
+          "The total number of packets received by the instances' driver";
+      }
+
+      leaf discard-bytes {
+        type oc-yang:counter64;
+        description
+          "Number of bytes sent from the instance's driver that were discarded";
+      }
+
+      leaf discard-pkts {
+        type oc-yang:counter64;
+        description
+          "Number of packets sent from the instance's driver that were discarded";
+      }
+
+    }
+  }
+
+  /*
+   * Data nodes
+   */
+
+  container virtual-ports {
+    description
+      "Enclosing container for the list of virtual ports";
+    
+    list virtual-port {
+      key "global-resource-id";
+
+      description
+        "A list of virtual ports";
+
+      leaf global-resource-id {
+        type leafref {
+          path "../config/global-resource-id";
+        }
+        description
+          "References the global resource ID";
+      }
+
+      container config {
+        description
+          "Configurable items at the global level";
+        oc-ext:telemetry-on-change;
+
+        uses vport-config;
+      }
+
+      container state {
+        config false;
+        description
+          "Operational state data at the global level";
+        
+        uses vport-config;
+        uses vport-state;
+        uses vport-counters;
+      }
+
+
+    }
+  }
+
+
+}
