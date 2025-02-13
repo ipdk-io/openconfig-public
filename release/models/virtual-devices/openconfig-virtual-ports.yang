@@ -22,6 +22,13 @@ module openconfig-virtual-ports {
   description
     "Model for managing virtual ports";
 
+  feature oper-status-change-notification {
+    description
+      "This feature indicates that the server supports
+      generating notifications on virtual ports operational
+      status change (UP/DOWN).";
+  }
+
   grouping vport-config {
     description
       "Configuration data for the virtual port";
@@ -468,5 +475,36 @@ module openconfig-virtual-ports {
     }
   }
 
+  notification oper-status-change {
+    if-feature "oper-status-change-notification";
+    description
+      "A virtual port operational state notification.";
+
+    leaf global-resource-id {
+      type uint32;
+      mandatory true;
+      description
+        "Identifies virtual port by global unique id.";
+    }
+
+    leaf oper-status {
+      type enumeration {
+        enum UP {
+          value 1;
+          description
+            "Ready to pass packets.";
+        }
+        enum DOWN {
+          value 2;
+          description
+            "The interface does not pass any packets.";
+        }
+      }
+      mandatory true;
+      description
+        "The current operational state of the virtual port";
+      oc-ext:telemetry-on-change;
+    }
+  }
 
 }
