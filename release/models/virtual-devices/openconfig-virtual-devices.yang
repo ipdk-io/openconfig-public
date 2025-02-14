@@ -108,7 +108,7 @@ module openconfig-virtual-devices {
       type string;
       description
         "Device specific version
-        
+
         For e.g.: 0.95 or 1.0 for virtio";
     }
 
@@ -321,7 +321,7 @@ module openconfig-virtual-devices {
       description
         "Hardware device on the host to associate this
         virtual device with.
-        
+
         For host virtualization on an infrastructure device only.";
     }
 
@@ -330,7 +330,7 @@ module openconfig-virtual-devices {
       description
         "The virtual function on the host virtual device to
         associate this virtual device with.
-        
+
         For host virtualization on an infrastructure device only.";
     }
   }
@@ -342,13 +342,13 @@ module openconfig-virtual-devices {
   container virtual-devices {
     description
       "Enclosing container for the list of virtual devices";
-    
+
     list virtual-device {
       key "device-id";
 
       description
         "A list of virtual devices";
-      
+
       leaf device-id {
         type leafref {
           path "../config/device-id";
@@ -371,7 +371,7 @@ module openconfig-virtual-devices {
         config false;
         description
           "Operational state data at the global level";
-        
+
         uses vdevice-config;
         uses vdevice-limits;
         uses vdevice-common-state;

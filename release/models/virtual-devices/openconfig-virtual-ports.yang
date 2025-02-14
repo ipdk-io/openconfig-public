@@ -11,7 +11,7 @@ module openconfig-virtual-ports {
 
   import openconfig-yang-types { prefix oc-yang; }
   import openconfig-extensions { prefix oc-ext; }
-  
+
   // meta
   organization "IPDK - Infrastructure Programming Development Kit";
 
@@ -22,6 +22,13 @@ module openconfig-virtual-ports {
   description
     "Model for managing virtual ports";
 
+  feature oper-status-change-notification {
+    description
+      "This feature indicates that the server supports
+      generating notifications on virtual ports operational
+      status change (UP/DOWN).";
+  }
+
   grouping vport-config {
     description
       "Configuration data for the virtual port";
@@ -30,8 +37,8 @@ module openconfig-virtual-ports {
       type uint32;
       description
         "A global resource ID that uniquely identifies the virtual port
-        resource. 
-        Valid Range is 16 to 2**32-1 (0-15 is reserved for non-virtual ports)"; 
+        resource.
+        Valid Range is 16 to 2**32-1 (0-15 is reserved for non-virtual ports)";
     }
 
     leaf host-id {
@@ -191,7 +198,7 @@ module openconfig-virtual-ports {
       description
         "Number of VFs being provisioned";
     }
-    
+
   }
 
   grouping vport-state {
@@ -243,13 +250,13 @@ module openconfig-virtual-ports {
       description
         "Enumerated host PCIe function bus ID";
     }
-    
+
     leaf pcie-device {
       type uint8;
       description
         "Enumerated host PCIe function device ID";
     }
-    
+
     leaf pcie-function {
       type uint8;
       description
@@ -431,7 +438,7 @@ module openconfig-virtual-ports {
   container virtual-ports {
     description
       "Enclosing container for the list of virtual ports";
-    
+
     list virtual-port {
       key "global-resource-id";
 
@@ -458,7 +465,7 @@ module openconfig-virtual-ports {
         config false;
         description
           "Operational state data at the global level";
-        
+
         uses vport-config;
         uses vport-state;
         uses vport-counters;
@@ -468,5 +475,36 @@ module openconfig-virtual-ports {
     }
   }
 
+  notification oper-status-change {
+    if-feature "oper-status-change-notification";
+    description
+      "A virtual port operational state notification.";
+
+    leaf global-resource-id {
+      type uint32;
+      mandatory true;
+      description
+        "Identifies virtual port by global unique id.";
+    }
+
+    leaf oper-status {
+      type enumeration {
+        enum UP {
+          value 1;
+          description
+            "Ready to pass packets.";
+        }
+        enum DOWN {
+          value 2;
+          description
+            "The interface does not pass any packets.";
+        }
+      }
+      mandatory true;
+      description
+        "The current operational state of the virtual port";
+      oc-ext:telemetry-on-change;
+    }
+  }
 
 }
