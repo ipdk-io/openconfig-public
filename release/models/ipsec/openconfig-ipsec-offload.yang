@@ -35,11 +35,11 @@ module openconfig-ipsec-offload {
       the NSF is expected to implement this
       feature.";
   }
-    
+
   grouping ipsec-offload-config {
     description
       "Reusable grouping for config data";
-    
+
     leaf offload-id {
       type uint32;
       mandatory true;
@@ -65,7 +65,7 @@ module openconfig-ipsec-offload {
         IPsec SA with an IPsec policy with
         the same req-id.";
     }
-    
+
     leaf spi {
       type uint32 {
         range "0..max";
@@ -74,7 +74,7 @@ module openconfig-ipsec-offload {
       description
         "IPsec SA of Security Parameter Index (SPI).";
     }
-    
+
     leaf ext-seq-num {
       type boolean;
       default "true";
@@ -105,14 +105,14 @@ module openconfig-ipsec-offload {
         "Security protocol of IPsec SA, only
         ESP so far.";
     }
-    
+
     leaf mode {
       type ietf-nsfikec:ipsec-mode;
       default "transport";
       description
         "Tunnel or transport mode.";
     }
-    
+
     container esp-sa {
       description
         "In case the IPsec SA is an
@@ -120,14 +120,14 @@ module openconfig-ipsec-offload {
         (ESP), it is required to specify
         encryption and integrity
         algorithms and key materials.";
-      
+
       container encryption {
         description
           "Configuration of encryption or
           AEAD algorithm for IPsec
           Encapsulation Security Payload
           (ESP).";
-        
+
         leaf encryption-algorithm {
           type ietf-nsfikec:encr-alg-t;
           default "12";
@@ -137,7 +137,7 @@ module openconfig-ipsec-offload {
             algorithms, the integrity-algorithm
             leaf is not used.";
         }
-        
+
         leaf key {
           ietf-nacm:default-deny-all;
           type ietf-yang:hex-string;
@@ -153,7 +153,7 @@ module openconfig-ipsec-offload {
             this leaf.  By default, it is
             128 bits.";
         }
-        
+
         leaf key-len {
           type uint32;
           mandatory true;
@@ -168,14 +168,14 @@ module openconfig-ipsec-offload {
       }
 
     } /*container esp-sa*/
-    
+
     container sa-lifetime-hard {
       description
         "IPsec SA hard lifetime.  The action
         associated is terminate and hold.";
       uses ietf-nsfikec:lifetime;
     }
-    
+
     container sa-lifetime-soft {
       description
         "IPsec SA soft lifetime.";
@@ -188,13 +188,13 @@ module openconfig-ipsec-offload {
     description
       "Operational state representing ipsec counters and
       and statistics.";
-    
+
     /*oc-ext:operational;*/
-    
+
     container counters {
       description
         "A collection of ipsec-related statistics objects.";
-      
+
       leaf pkts-processed {
       type oc-yang:counter64;
       description
@@ -275,11 +275,11 @@ module openconfig-ipsec-offload {
 
             uses ipsec-offload-config;
           } /*config*/
-          
+
           container state {
             config false;
             uses ipsec-offload-config;
-            uses ipsec-offload-state; 
+            uses ipsec-offload-state;
           }/*container state*/
         } /*list sad-entry*/
       } /*container sad*/
@@ -348,7 +348,7 @@ module openconfig-ipsec-offload {
       type boolean;
       mandatory true;
       description
-        "Contains the destination IP address type Ipv4/Ipv6. If the value is true(1) 
+        "Contains the destination IP address type Ipv4/Ipv6. If the value is true(1)
         the address in ipv4, If the value is false the address is ipv6";
     }
 
